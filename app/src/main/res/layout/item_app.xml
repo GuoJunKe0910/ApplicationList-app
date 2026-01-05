@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="10dp"
+    android:layout_marginTop="6dp"
+    android:layout_marginEnd="10dp"
+    android:layout_marginBottom="6dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="3dp"
+    app:contentPadding="14dp"
+    app:strokeColor="#E0E0E0"
+    app:strokeWidth="1dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- 应用图标 -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/iconCard"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/ivAppIcon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="应用图标"
+                android:padding="4dp"
+                tools:src="@mipmap/ic_launcher" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 应用名称 -->
+        <TextView
+            android:id="@+id/tvAppName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:layout_marginEnd="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="#212121"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@id/tvInstallTime"
+            app:layout_constraintStart_toEndOf="@id/iconCard"
+            app:layout_constraintTop_toTopOf="@id/iconCard"
+            tools:text="示例应用" />
+
+        <!-- 安装时间 -->
+        <TextView
+            android:id="@+id/tvInstallTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="#9E9E9E"
+            android:textSize="10sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tvAppName"
+            tools:text="安装: 2024-01-01 12:30:45" />
+
+        <!-- 更新时间 -->
+        <TextView
+            android:id="@+id/tvUpdateTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="2dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="#9E9E9E"
+            android:textSize="10sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvInstallTime"
+            tools:text="更新: 2024-12-23 15:20:10" />
+
+        <!-- 包名 -->
+        <TextView
+            android:id="@+id/tvPackageName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="#757575"
+            android:textSize="11sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/tvAppName"
+            app:layout_constraintTop_toBottomOf="@id/tvAppName"
+            tools:text="com.example.app" />
+
+        <!-- 版本信息 -->
+        <TextView
+            android:id="@+id/tvVersion"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="#757575"
+            android:textSize="11sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/tvAppName"
+            app:layout_constraintTop_toBottomOf="@id/tvPackageName"
+            tools:text="版本: 1.0.0 (100)" />
+
+        <!-- 分隔线 -->
+        <View
+            android:id="@+id/divider"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:background="#EEEEEE"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvVersion" />
+
+        <!-- 一行五个按钮 -->
+        <!-- 启动按钮 - 绿色 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnLaunch"
+            style="@style/ButtonLaunch"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="3dp"
+            android:text="启动"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:paddingStart="2dp"
+            android:paddingEnd="2dp"
+            app:iconSize="0dp"
+            app:layout_constraintEnd_toStartOf="@id/btnForceStop"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/divider" />
+
+        <!-- 强制停止按钮 - 黄色 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnForceStop"
+            style="@style/ButtonStop"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="3dp"
+            android:layout_marginEnd="3dp"
+            android:text="停止"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:paddingStart="2dp"
+            android:paddingEnd="2dp"
+            app:iconSize="0dp"
+            app:layout_constraintEnd_toStartOf="@id/btnAppInfo"
+            app:layout_constraintStart_toEndOf="@id/btnLaunch"
+            app:layout_constraintTop_toTopOf="@id/btnLaunch" />
+
+        <!-- 应用信息按钮 - 黑色 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAppInfo"
+            style="@style/ButtonInfo"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="3dp"
+            android:layout_marginEnd="3dp"
+            android:text="信息"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:paddingStart="2dp"
+            android:paddingEnd="2dp"
+            app:iconSize="0dp"
+            app:layout_constraintEnd_toStartOf="@id/btnClearData"
+            app:layout_constraintStart_toEndOf="@id/btnForceStop"
+            app:layout_constraintTop_toTopOf="@id/btnLaunch" />
+
+        <!-- 清除数据按钮 - 灰色 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnClearData"
+            style="@style/ButtonClear"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="3dp"
+            android:layout_marginEnd="3dp"
+            android:text="清除"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:paddingStart="2dp"
+            android:paddingEnd="2dp"
+            app:iconSize="0dp"
+            app:layout_constraintEnd_toStartOf="@id/btnUninstall"
+            app:layout_constraintStart_toEndOf="@id/btnAppInfo"
+            app:layout_constraintTop_toTopOf="@id/btnLaunch" />
+
+        <!-- 卸载按钮 - 红色 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnUninstall"
+            style="@style/ButtonUninstall"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="3dp"
+            android:text="卸载"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:paddingStart="2dp"
+            android:paddingEnd="2dp"
+            app:iconSize="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/btnClearData"
+            app:layout_constraintTop_toTopOf="@id/btnLaunch" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>
+

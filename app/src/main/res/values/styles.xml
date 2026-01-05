@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 启动按钮样式 - 绿色 -->
+    <style name="ButtonLaunch" parent="Widget.Material3.Button.TonalButton">
+        <item name="backgroundTint">@color/btn_launch_bg</item>
+        <item name="android:textColor">@color/btn_launch_text</item>
+        <item name="iconTint">@color/btn_launch_text</item>
+        <item name="cornerRadius">8dp</item>
+    </style>
+
+    <!-- 停止按钮样式 - 黄色 -->
+    <style name="ButtonStop" parent="Widget.Material3.Button.TonalButton">
+        <item name="backgroundTint">@color/btn_stop_bg</item>
+        <item name="android:textColor">@color/btn_stop_text</item>
+        <item name="iconTint">@color/btn_stop_text</item>
+        <item name="cornerRadius">8dp</item>
+    </style>
+
+    <!-- 信息按钮样式 - 黑色 -->
+    <style name="ButtonInfo" parent="Widget.Material3.Button.TonalButton">
+        <item name="backgroundTint">@color/btn_info_bg</item>
+        <item name="android:textColor">@color/btn_info_text</item>
+        <item name="iconTint">@color/btn_info_text</item>
+        <item name="cornerRadius">8dp</item>
+    </style>
+
+    <!-- 清除数据按钮样式 - 灰色 -->
+    <style name="ButtonClear" parent="Widget.Material3.Button.TonalButton">
+        <item name="backgroundTint">@color/btn_clear_bg</item>
+        <item name="android:textColor">@color/btn_clear_text</item>
+        <item name="iconTint">@color/btn_clear_text</item>
+        <item name="cornerRadius">8dp</item>
+    </style>
+
+    <!-- 卸载按钮样式 - 红色 -->
+    <style name="ButtonUninstall" parent="Widget.Material3.Button.TonalButton">
+        <item name="backgroundTint">@color/btn_uninstall_bg</item>
+        <item name="android:textColor">@color/btn_uninstall_text</item>
+        <item name="iconTint">@color/btn_uninstall_text</item>
+        <item name="cornerRadius">8dp</item>
+    </style>
+</resources>
+
+
