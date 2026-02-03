@@ -12,6 +12,7 @@ import android.os.Looper
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.inputmethod.EditorInfo
 import android.widget.PopupMenu
 import android.widget.Toast
@@ -20,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.my.applist.databinding.ActivityMainBinding
+import com.my.applist.utils.HmacSHA256Utils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -30,15 +32,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter: AppListAdapter
     private val allAppList = mutableListOf<AppInfo>() // 所有应用
     private val displayList = mutableListOf<AppInfo>() // 显示的应用列表
-    
+
     private var currentSearchQuery = "" // 当前搜索关键词
     private var currentFilterMode = FilterMode.NONE // 当前筛选模式
     private var isSearching = false // 是否正在搜索
     private var hasRootAccess = false // 是否有root权限
-    
+
     private val searchHandler = Handler(Looper.getMainLooper())
     private var searchRunnable: Runnable? = null
-    
+
     enum class FilterMode {
         NONE,           // 无筛选
         TIME_DESC,      // 按时间降序
@@ -59,6 +61,10 @@ class MainActivity : AppCompatActivity() {
         setupFilterListeners()
         setupSwipeRefresh()
         loadInstalledApps()
+        val string =
+            "POST|/api/v1/config|channel=default&packageName=com.community.mbox.in&versionName=3.0.12.0123.03|1769601201192"
+        val encryptSafe = HmacSHA256Utils.encryptSafe(string, "test-secret-key")
+        Log.e("MainActivity", "onCreate: $encryptSafe")
     }
 
     override fun onResume() {
@@ -83,11 +89,11 @@ class MainActivity : AppCompatActivity() {
     private fun checkRootAccess() {
         lifecycleScope.launch {
             binding.tvRootStatus.text = "检测Root权限中..."
-            
+
             hasRootAccess = withContext(Dispatchers.IO) {
                 RootUtils.checkRootAccess()
             }
-            
+
             binding.tvRootStatus.text = if (hasRootAccess) {
                 "✓ Root权限已获取，可使用高级功能"
             } else {
@@ -109,7 +115,7 @@ class MainActivity : AppCompatActivity() {
             onClearDataClick = { appInfo -> clearAppData(appInfo) },
             onUninstallClick = { appInfo -> uninstallApp(appInfo) }
         )
-        
+
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = this@MainActivity.adapter
@@ -123,15 +129,15 @@ class MainActivity : AppCompatActivity() {
         // 文字变化监听（带防抖）
         binding.etSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            
+
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            
+
             override fun afterTextChanged(s: Editable?) {
                 // 取消之前的搜索任务
                 searchRunnable?.let { searchHandler.removeCallbacks(it) }
-                
+
                 val query = s?.toString()?.trim() ?: ""
-                
+
                 // 如果是空字符串，立即恢复显示
                 if (query.isEmpty()) {
                     currentSearchQuery = ""
@@ -139,7 +145,16 @@ class MainActivity : AppCompatActivity() {
                     applyFilter()
                     return
                 }
-                
+
+                // 特殊搜索：输入"111"跳转到Opera广告测试页面
+                if (query == "opera") {
+                    val intent = Intent(this@MainActivity, OperaAdTestActivity::class.java)
+                    startActivity(intent)
+                    // 清空搜索框
+                    binding.etSearch.setText("")
+                    return
+                }
+
                 // 延迟300ms执行搜索，避免频繁触发
                 searchRunnable = Runnable {
                     currentSearchQuery = query
@@ -149,7 +164,7 @@ class MainActivity : AppCompatActivity() {
                 searchHandler.postDelayed(searchRunnable!!, 300)
             }
         })
-        
+
         // 键盘搜索按钮监听
         binding.etSearch.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
@@ -162,7 +177,8 @@ class MainActivity : AppCompatActivity() {
                 }
                 // 隐藏软键盘
                 binding.etSearch.clearFocus()
-                val imm = getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+                val imm =
+                    getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
                 imm.hideSoftInputFromWindow(binding.etSearch.windowToken, 0)
                 true
             } else {
@@ -183,7 +199,7 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "请先清除搜索", Toast.LENGTH_SHORT).show()
             }
         }
-        
+
         // 按首字母筛选
         binding.btnFilterLetter.setOnClickListener {
             if (!isSearching) {
@@ -192,7 +208,7 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "请先清除搜索", Toast.LENGTH_SHORT).show()
             }
         }
-        
+
         // 清除筛选
         binding.btnClearFilter.setOnClickListener {
             currentFilterMode = FilterMode.NONE
@@ -212,7 +228,7 @@ class MainActivity : AppCompatActivity() {
             getColor(R.color.primary_dark),
             getColor(R.color.accent)
         )
-        
+
         binding.swipeRefresh.setOnRefreshListener {
             // 重新加载应用列表
             loadInstalledApps()
@@ -225,7 +241,7 @@ class MainActivity : AppCompatActivity() {
     private fun showTimeFilterDialog() {
         val popupMenu = PopupMenu(this, binding.btnFilterTime)
         popupMenu.menuInflater.inflate(R.menu.menu_filter_time, popupMenu.menu)
-        
+
         popupMenu.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.menu_time_desc -> {
@@ -235,6 +251,7 @@ class MainActivity : AppCompatActivity() {
                     applyFilter()
                     true
                 }
+
                 R.id.menu_time_asc -> {
                     currentFilterMode = FilterMode.TIME_ASC
                     binding.btnFilterTime.text = "时间↑"
@@ -242,10 +259,11 @@ class MainActivity : AppCompatActivity() {
                     applyFilter()
                     true
                 }
+
                 else -> false
             }
         }
-        
+
         popupMenu.show()
     }
 
@@ -255,7 +273,7 @@ class MainActivity : AppCompatActivity() {
     private fun showLetterFilterDialog() {
         val popupMenu = PopupMenu(this, binding.btnFilterLetter)
         popupMenu.menuInflater.inflate(R.menu.menu_filter_letter, popupMenu.menu)
-        
+
         popupMenu.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.menu_letter_asc -> {
@@ -265,6 +283,7 @@ class MainActivity : AppCompatActivity() {
                     applyFilter()
                     true
                 }
+
                 R.id.menu_letter_desc -> {
                     currentFilterMode = FilterMode.LETTER_DESC
                     binding.btnFilterLetter.text = "字母↓"
@@ -272,10 +291,11 @@ class MainActivity : AppCompatActivity() {
                     applyFilter()
                     true
                 }
+
                 else -> false
             }
         }
-        
+
         popupMenu.show()
     }
 
@@ -285,13 +305,13 @@ class MainActivity : AppCompatActivity() {
     private fun performSearch() {
         val query = currentSearchQuery.lowercase()
         displayList.clear()
-        
+
         displayList.addAll(allAppList.filter { app ->
             app.appName.lowercase().contains(query) ||
-            app.packageName.lowercase().contains(query) ||
-            app.pinyin.lowercase().contains(query)
+                    app.packageName.lowercase().contains(query) ||
+                    app.pinyin.lowercase().contains(query)
         })
-        
+
         adapter.notifyDataSetChanged()
         updateAppCount()
     }
@@ -301,7 +321,7 @@ class MainActivity : AppCompatActivity() {
      */
     private fun applyFilter() {
         displayList.clear()
-        
+
         val sortedList = when (currentFilterMode) {
             FilterMode.TIME_DESC -> allAppList.sortedByDescending { it.updateTime }
             FilterMode.TIME_ASC -> allAppList.sortedBy { it.updateTime }
@@ -309,7 +329,7 @@ class MainActivity : AppCompatActivity() {
             FilterMode.LETTER_DESC -> allAppList.sortedByDescending { it.firstLetter }
             FilterMode.NONE -> allAppList.sortedByDescending { it.updateTime } // 默认按更新时间降序
         }
-        
+
         displayList.addAll(sortedList)
         adapter.notifyDataSetChanged()
         updateAppCount()
@@ -335,28 +355,29 @@ class MainActivity : AppCompatActivity() {
             if (!binding.swipeRefresh.isRefreshing) {
                 binding.progressBar.visibility = android.view.View.VISIBLE
             }
-            
+
             val apps = withContext(Dispatchers.IO) {
                 val pm = packageManager
                 val currentPackageName = packageName // 获取本应用的包名
                 val installedApps = pm.getInstalledApplications(PackageManager.GET_META_DATA)
-                
+
                 installedApps
                     .filter { it.packageName != currentPackageName } // 排除本应用
                     .mapNotNull { appInfo ->
                         try {
                             val packageInfo = pm.getPackageInfo(appInfo.packageName, 0)
                             val appName = appInfo.loadLabel(pm).toString()
-                            
+
                             // 获取版本信息
                             val versionName = packageInfo.versionName ?: "未知"
-                            val versionCode = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-                                packageInfo.longVersionCode
-                            } else {
-                                @Suppress("DEPRECATION")
-                                packageInfo.versionCode.toLong()
-                            }
-                            
+                            val versionCode =
+                                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                                    packageInfo.longVersionCode
+                                } else {
+                                    @Suppress("DEPRECATION")
+                                    packageInfo.versionCode.toLong()
+                                }
+
                             AppInfo(
                                 appName = appName,
                                 packageName = appInfo.packageName,
@@ -376,17 +397,17 @@ class MainActivity : AppCompatActivity() {
                     // 默认按更新时间降序排序
                     .sortedByDescending { it.updateTime }
             }
-            
+
             allAppList.clear()
             allAppList.addAll(apps)
-            
+
             // 根据当前状态更新显示列表
             if (isSearching) {
                 performSearch()
             } else {
                 applyFilter()
             }
-            
+
             binding.progressBar.visibility = android.view.View.GONE
             binding.swipeRefresh.isRefreshing = false
         }
@@ -438,15 +459,19 @@ class MainActivity : AppCompatActivity() {
                             .setCancelable(false)
                             .create()
                         progressDialog.show()
-                        
+
                         val success = withContext(Dispatchers.IO) {
                             RootUtils.forceStopApp(appInfo.packageName)
                         }
-                        
+
                         progressDialog.dismiss()
-                        
+
                         if (success) {
-                            Toast.makeText(this@MainActivity, "已强制停止 ${appInfo.appName}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this@MainActivity,
+                                "已强制停止 ${appInfo.appName}",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         } else {
                             Toast.makeText(this@MainActivity, "停止失败", Toast.LENGTH_SHORT).show()
                         }
@@ -477,15 +502,19 @@ class MainActivity : AppCompatActivity() {
                             .setCancelable(false)
                             .create()
                         progressDialog.show()
-                        
+
                         val success = withContext(Dispatchers.IO) {
                             RootUtils.clearAppData(appInfo.packageName)
                         }
-                        
+
                         progressDialog.dismiss()
-                        
+
                         if (success) {
-                            Toast.makeText(this@MainActivity, "已清除 ${appInfo.appName} 的数据", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this@MainActivity,
+                                "已清除 ${appInfo.appName} 的数据",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         } else {
                             Toast.makeText(this@MainActivity, "清除失败", Toast.LENGTH_SHORT).show()
                         }
@@ -514,7 +543,7 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, "系统应用无法卸载", Toast.LENGTH_SHORT).show()
             return
         }
-        
+
         try {
             val intent = Intent(Intent.ACTION_DELETE).apply {
                 data = Uri.fromParts("package", appInfo.packageName, null)
