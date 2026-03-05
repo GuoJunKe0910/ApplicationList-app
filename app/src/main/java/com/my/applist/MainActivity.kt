@@ -1,11 +1,13 @@
 package com.my.applist
 
+import android.app.Activity
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -21,10 +23,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.my.applist.databinding.ActivityMainBinding
+import com.my.applist.utils.ApiCallback
+import com.my.applist.utils.ApiRequestTask
 import com.my.applist.utils.HmacSHA256Utils
+import com.my.applist.utils.TAG
+import com.my.applist.utils.getCountry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import java.util.Date
 
 class MainActivity : AppCompatActivity() {
 
@@ -73,6 +81,7 @@ class MainActivity : AppCompatActivity() {
         if (allAppList.isNotEmpty()) {
             loadInstalledApps()
         }
+        getData(this)
     }
 
     /**
@@ -100,6 +109,38 @@ class MainActivity : AppCompatActivity() {
                 "⚠ 无Root权限，部分功能受限"
             }
         }
+    }
+
+    private fun getData(activity: Activity) {
+        val packageName = "com.netshort.abroad"
+        val json = JSONObject()
+//        val packageInfo = activity.packageManager.getPackageInfo(activity.packageName, 0)
+        json.put("packageName", packageName)
+        json.put("versionCode", 1213)
+        json.put("versionName", "2.1.3")
+        json.put("androidVersion", "Android10")
+        json.put("deviceModel", Build.MODEL)
+        json.put("deviceBrand", Build.BRAND)
+        json.put("deviceId", "")
+        json.put("channel", "default")
+        json.put("timestamp", Date().time)
+        json.put("region", getCountry())
+        val requestBody = json.toString()
+        Log.e(TAG, "getData: ${requestBody}")
+        ApiRequestTask(requestBody, object : ApiCallback {
+            override fun onSuccess(data: String) {
+                activity.runOnUiThread {
+                    Log.e(TAG, "onSuccess: ${data}")
+//                    isNeedUpdate(activity, parseJson(data))
+                }
+            }
+
+            override fun onFailure(errorMessage: String) {
+                activity.runOnUiThread {
+                    Log.e(TAG, "onFailure: $errorMessage")
+                }
+            }
+        }).execute()
     }
 
 
